@@ -1,6 +1,6 @@
 let reasonCount = 0;
-// Added: This array remembers all previously approved submissions
-let existingReasons = [];
+// We will store the alphabetical "fingerprints" of the words used so far
+let existingFingerprints = [];
 
 document.getElementById('submitBtn').addEventListener('click', function() {
     const text = document.getElementById('reasonInput').value;
@@ -8,31 +8,33 @@ document.getElementById('submitBtn').addEventListener('click', function() {
     if (text.trim() === "") return;
 
     // --- MODERATION LOGIC START ---
-    // 1. Clean the incoming text (lowercase, strip out punctuation/extra spaces)
-    const cleanNewText = text.toLowerCase().trim().replace(/[^\w\s]/gi, '');
+    
+    // 1. Convert to lowercase, strip punctuation and emojis
+    const cleanText = text.toLowerCase().replace(/[^\w\s]|_/g, "");
 
-    // 2. Scan the wall to see if it's identical or heavily overlapping
-    let isDuplicate = existingReasons.some(oldText => {
-        return oldText === cleanNewText || 
-               (oldText.includes(cleanNewText) && cleanNewText.length > 10) ||
-               (cleanNewText.includes(oldText) && oldText.length > 10);
-    });
+    // 2. Break the phrase into individual words, sort them alphabetically, and squash them back together
+    const wordsArray = cleanText.split(/\s+/).filter(word => word.length > 0);
+    wordsArray.sort(); 
+    const currentFingerprint = wordsArray.join("");
 
-    if (isDuplicate) {
+    // 3. Scan our memory to see if this exact combination of words has been used before
+    if (existingFingerprints.includes(currentFingerprint)) {
         alert("This beautiful reason is already on our wall! Try sharing something else that keeps you going.");
         return; // Stops execution so the note is never created
     }
+    
     // --- MODERATION LOGIC END ---
 
     reasonCount++;
-    // Save this unique text to our memory array for future checks
-    existingReasons.push(cleanNewText); 
+    
+    // Save this unique fingerprint to our memory for future checks
+    existingFingerprints.push(currentFingerprint); 
     
     document.getElementById('countNumber').textContent = reasonCount;
 
     const note = document.createElement('div');
 
-    // This safely chooses a random color from 1 to 5 (Kept from your original code!)
+    // Chooses a random color from 1 to 5
     const randomColor = Math.floor(Math.random() * 5) + 1;
     note.className = "sticky-note color-" + randomColor;
 
