@@ -1,4 +1,5 @@
 let reasonCount = 0;
+// We will store the "fingerprints" of the words used so far
 let existingFingerprints = [];
 
 document.getElementById('submitBtn').addEventListener('click', function() {
@@ -7,36 +8,34 @@ document.getElementById('submitBtn').addEventListener('click', function() {
     
     if (originalText === "") return;
 
-    // --- SMART MODERATION FILTER ---
-    // This creates the "fingerprint" by sorting letters alphabetically
-    const fingerprint = originalText.toLowerCase()
-        .replace(/[^a-z0-9]/g, "") 
-        .split("")                 
-        .sort()                    
-        .join("");                 
+    // --- SMART MODERATION LOGIC ---
 
+    // 1. Create the "Fingerprint"
+    // We lowercase it, remove punctuation/emojis, and split it into words
+    const words = originalText.toLowerCase()
+        .replace(/[^\w\s]|_/g, "") // Removes punctuation
+        .split(/\s+/)              // Splits into individual words
+        .filter(word => word.length > 0) // Removes empty spaces
+        .sort();                   // Sorts alphabetically (A-Z)
+
+    const fingerprint = words.join(""); // Squashes them into one string
+
+    // 2. Check if this fingerprint has been seen before
     if (existingFingerprints.includes(fingerprint)) {
-        alert("This reason is already on the wall!");
+        alert("This sentiment is already on the wall! Try sharing a different reason.");
         return; 
     }
 
-    // --- LOGIC ---
+    // 3. If it's new, save the fingerprint and create the note
     existingFingerprints.push(fingerprint);
     reasonCount++;
+    
     document.getElementById('countNumber').textContent = reasonCount;
 
-    // --- DESIGN: RESTORING RANDOM COLORS ---
     const note = document.createElement('div');
+    note.className = `sticky-note note-yellow`; 
     
-    // This array lists the 5 colors we set up in your CSS
-    const colors = ['yellow', 'green', 'blue', 'pink', 'purple'];
-    // This picks one of those 5 colors at random
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    
-    // This applies the correct glowing class (e.g., "note-pink")
-    note.className = `sticky-note note-${randomColor}`; 
-    
-    const randomTilt = Math.floor(Math.random() * 12) - 6; 
+    const randomTilt = Math.floor(Math.random() * 10) - 5; 
     note.style.transform = `rotate(${randomTilt}deg)`;
 
     note.innerHTML = `
