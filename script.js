@@ -1,60 +1,49 @@
-// --- GLOBAL DATA ---
 let reasonCount = 0;
-// This "Memory" list resets every time you refresh the page.
-// Once we add a Database later, this will stay forever!
 let existingFingerprints = [];
 
-// --- THE BUTTON CLICK ACTION ---
 document.getElementById('submitBtn').addEventListener('click', function() {
     const inputArea = document.getElementById('reasonInput');
     const originalText = inputArea.value.trim();
     
-    // 1. Don't do anything if the box is empty
-    if (originalText === "") {
-        alert("Please share a reason, even a tiny one.");
-        return;
-    }
+    if (originalText === "") return;
 
-    // 2. THE SMART MODERATION FILTER
-    // This creates a "Letter Fingerprint"
-    // Example: "Dog" becomes "dgo" | "God" becomes "dgo"
+    // --- SMART MODERATION FILTER ---
+    // This creates the "fingerprint" by sorting letters alphabetically
     const fingerprint = originalText.toLowerCase()
-        .replace(/[^a-z0-9]/g, "") // Remove spaces and punctuation
-        .split("")                 // Split into letters
-        .sort()                    // Alphabetize letters
-        .join("");                 // Squash back together
+        .replace(/[^a-z0-9]/g, "") 
+        .split("")                 
+        .sort()                    
+        .join("");                 
 
-    // 3. CHECK FOR DUPLICATES
     if (existingFingerprints.includes(fingerprint)) {
-        alert("This beautiful reason (or something very similar) is already on the wall!");
-        return; // This STOPS the note from being created
+        alert("This reason is already on the wall!");
+        return; 
     }
 
-    // 4. IF UNIQUE: ADD TO MEMORY AND POST
+    // --- LOGIC ---
     existingFingerprints.push(fingerprint);
     reasonCount++;
-    
-    // Update the number at the top of the screen
     document.getElementById('countNumber').textContent = reasonCount;
 
-    // 5. CREATE THE STICKY NOTE HTML
+    // --- DESIGN: RESTORING RANDOM COLORS ---
     const note = document.createElement('div');
-    note.className = `sticky-note note-yellow`; 
     
-    // Give it a random messy tilt
+    // This array lists the 5 colors we set up in your CSS
+    const colors = ['yellow', 'green', 'blue', 'pink', 'purple'];
+    // This picks one of those 5 colors at random
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+    
+    // This applies the correct glowing class (e.g., "note-pink")
+    note.className = `sticky-note note-${randomColor}`; 
+    
     const randomTilt = Math.floor(Math.random() * 12) - 6; 
     note.style.transform = `rotate(${randomTilt}deg)`;
 
-    // Put the text and the reason number inside the note
     note.innerHTML = `
         <p>${originalText}</p>
         <span class="reason-number">Reason #${reasonCount}</span>
     `;
 
-    // 6. ADD TO THE WALL
-    const board = document.getElementById('stickyBoard');
-    board.prepend(note);
-
-    // 7. CLEAR THE INPUT BOX
+    document.getElementById('stickyBoard').prepend(note);
     inputArea.value = "";
 });
