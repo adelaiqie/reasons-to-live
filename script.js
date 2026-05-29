@@ -9,7 +9,7 @@ document.getElementById('submitBtn').addEventListener('click', function() {
     document.getElementById('countNumber').textContent = reasonCount;
 
     const note = document.createElement('div');
-    note.className = `sticky-note color-${Math.floor(Math.random() * 3) + 1}`;
+    note.className = `sticky-note color-${Math.floor(Math.random() * 5) + 1}`;
     
     note.innerHTML = `
         <p>${text}</p>
