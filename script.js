@@ -16,6 +16,7 @@ document.getElementById('submitBtn').addEventListener('click', function() {
         <span class="reason-number">Reason #${reasonCount}</span>
     `;
 
+    
     document.getElementById('stickyBoard').prepend(note);
     document.getElementById('reasonInput').value = "";
 });
