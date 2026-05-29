@@ -1,48 +1,60 @@
+// --- GLOBAL DATA ---
 let reasonCount = 0;
-// We will store the alphabetical "fingerprints" of the words used so far
+// This "Memory" list resets every time you refresh the page.
+// Once we add a Database later, this will stay forever!
 let existingFingerprints = [];
 
+// --- THE BUTTON CLICK ACTION ---
 document.getElementById('submitBtn').addEventListener('click', function() {
-    const text = document.getElementById('reasonInput').value;
-
-    if (text.trim() === "") return;
-
-    // --- MODERATION LOGIC START ---
+    const inputArea = document.getElementById('reasonInput');
+    const originalText = inputArea.value.trim();
     
-    // 1. Convert to lowercase, strip punctuation and emojis
-    const cleanText = text.toLowerCase().replace(/[^\w\s]|_/g, "");
-
-    // 2. Break the phrase into individual words, sort them alphabetically, and squash them back together
-    const wordsArray = cleanText.split(/\s+/).filter(word => word.length > 0);
-    wordsArray.sort(); 
-    const currentFingerprint = wordsArray.join("");
-
-    // 3. Scan our memory to see if this exact combination of words has been used before
-    if (existingFingerprints.includes(currentFingerprint)) {
-        alert("This beautiful reason is already on our wall! Try sharing something else that keeps you going.");
-        return; // Stops execution so the note is never created
+    // 1. Don't do anything if the box is empty
+    if (originalText === "") {
+        alert("Please share a reason, even a tiny one.");
+        return;
     }
-    
-    // --- MODERATION LOGIC END ---
 
+    // 2. THE SMART MODERATION FILTER
+    // This creates a "Letter Fingerprint"
+    // Example: "Dog" becomes "dgo" | "God" becomes "dgo"
+    const fingerprint = originalText.toLowerCase()
+        .replace(/[^a-z0-9]/g, "") // Remove spaces and punctuation
+        .split("")                 // Split into letters
+        .sort()                    // Alphabetize letters
+        .join("");                 // Squash back together
+
+    // 3. CHECK FOR DUPLICATES
+    if (existingFingerprints.includes(fingerprint)) {
+        alert("This beautiful reason (or something very similar) is already on the wall!");
+        return; // This STOPS the note from being created
+    }
+
+    // 4. IF UNIQUE: ADD TO MEMORY AND POST
+    existingFingerprints.push(fingerprint);
     reasonCount++;
     
-    // Save this unique fingerprint to our memory for future checks
-    existingFingerprints.push(currentFingerprint); 
-    
+    // Update the number at the top of the screen
     document.getElementById('countNumber').textContent = reasonCount;
 
+    // 5. CREATE THE STICKY NOTE HTML
     const note = document.createElement('div');
+    note.className = `sticky-note note-yellow`; 
+    
+    // Give it a random messy tilt
+    const randomTilt = Math.floor(Math.random() * 12) - 6; 
+    note.style.transform = `rotate(${randomTilt}deg)`;
 
-    // Chooses a random color from 1 to 5
-    const randomColor = Math.floor(Math.random() * 5) + 1;
-    note.className = "sticky-note color-" + randomColor;
-
+    // Put the text and the reason number inside the note
     note.innerHTML = `
-        <p>${text}</p>
+        <p>${originalText}</p>
         <span class="reason-number">Reason #${reasonCount}</span>
     `;
 
-    document.getElementById('stickyBoard').prepend(note);
-    document.getElementById('reasonInput').value = "";
+    // 6. ADD TO THE WALL
+    const board = document.getElementById('stickyBoard');
+    board.prepend(note);
+
+    // 7. CLEAR THE INPUT BOX
+    inputArea.value = "";
 });
